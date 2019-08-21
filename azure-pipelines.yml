@@ -20,6 +20,24 @@ steps:
     projects: '**/*TEST/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
+# - task: SonarSource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@4
+#   displayName: 'Prepare analysis on Sonarcloud'
+#   inputs:
+#     SonarQube: 'SonarCloud'
+#     projectKey: 3c0f422a21dfc8b132b54b19afd88c092faeb835
+#     projectName: SimpleAPI
+#     projectVersion: '$(AssemblyVersion)'
+#     extraProperties: |
+#      sonar.organization=brijen1812-github
+#      sonar.branch.name=$(Build.SourceBranchName)
+
+- task: SonarCloudPrepare@1
+    displayName: 'Prepare analysis on SonarCloud'
+    inputs:
+      SonarCloud: SonarCloud
+      organization: brijenmakwana
+      projectKey: SimpleAPI
+
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
 
@@ -38,7 +56,13 @@ steps:
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: True
 
+- task: SonarCloudAnalyze@1
+    displayName: 'Run Code Analysis'
+
+- task: SonarCloudPublish@1
+    displayName: 'Publish Quality Gate Result' 
+
 # this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
 - task: PublishBuildArtifacts@1
   displayName: 'publish artifacts'
-  
+
